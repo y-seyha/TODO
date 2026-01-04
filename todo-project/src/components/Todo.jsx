@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { FaTrash, FaEdit, FaCheck } from "react-icons/fa";
 
 const Todo = () => {
   const [text, setText] = useState("");
-
+  const [editText, setEditText] = useState("");
+  const [editIndex, setEditIndex] = useState(null);
   // Load from localStorage
   const [todo, setTodo] = useState(() => {
     return JSON.parse(localStorage.getItem("todo") || "[]");
   });
-
 
   useEffect(() => {
     localStorage.setItem("todo", JSON.stringify(todo));
@@ -32,6 +33,25 @@ const Todo = () => {
     setTodo(newTodo);
   }
 
+  function handleClearButton() {
+    if (window.confirm("Are you sure you want to clear all todos?")) {
+      setTodo([]);
+    }
+  }
+
+  function startEdit(index) {
+    setEditIndex(index);
+    setEditText(todo[index].text);
+  }
+
+  function saveEdit(index) {
+    const newTodo = [...todo];
+    newTodo[index].text = editText.trim() || newTodo[index].text;
+    setTodo(newTodo);
+    setEditIndex(null);
+    setEditText("");
+  }
+
   return (
     <div className="min-h-screen bg-slate-800 p-4">
       <div className="mt-5 w-full max-w-md mx-auto bg-blue-200 rounded-2xl flex flex-col p-6 md:p-10">
@@ -52,9 +72,15 @@ const Todo = () => {
           />
           <button
             onClick={handleAddButton}
-            className="w-full sm:w-auto bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition"
+            className="w-full sm:w-auto bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition cursor-pointer"
           >
             Add
+          </button>
+          <button
+            onClick={() => handleClearButton()}
+            className="w-full sm:w-auto bg-red-500 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition cursor-pointer"
+          >
+            Clear All
           </button>
         </div>
 
@@ -70,17 +96,44 @@ const Todo = () => {
                   checked={item.done}
                   onChange={() => toggleDone(index)}
                 />
-                <span className={item.done ? "line-through text-gray-400" : ""}>
-                  {item.text}
-                </span>
+
+                {editIndex === index ? (
+                  <input
+                    type="text"
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") saveEdit(index);
+                    }}
+                    className="border-b border-gray-400 px-1 py-1 focus:outline-none"
+                    autoFocus
+                  />
+                ) : (
+                  <span
+                    className={item.done ? "line-through text-red-400" : ""}
+                  >
+                    {item.text}
+                  </span>
+                )}
               </div>
 
-              <button
-                onClick={() => handleDeleteButton(index)}
-                className="ml-2 px-2 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
-              >
-                Delete
-              </button>
+              <div className="flex gap-2">
+                {editIndex === index ? (
+                  <FaCheck
+                    className="text-green-600 cursor-pointer"
+                    onClick={() => saveEdit(index)}
+                  />
+                ) : (
+                  <FaEdit
+                    className="text-blue-600 cursor-pointer"
+                    onClick={() => startEdit(index)}
+                  />
+                )}
+                <FaTrash
+                  className="text-red-600 cursor-pointer"
+                  onClick={() => handleDeleteButton(index)}
+                />
+              </div>
             </div>
           ))}
         </div>
