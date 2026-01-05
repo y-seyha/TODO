@@ -114,7 +114,7 @@ const Todo = () => {
 
         <div className="flex-1 overflow-auto space-y-2 max-h-[60vh]">
           {[...filterTodo]
-            .sort((a, b) => new Date(b.createAt) - new Date(a.createAt))
+            .sort((a, b) => new Date(a.createAt) - new Date(b.createAt))
             .map((item, index) => (
               <div
                 key={index}
